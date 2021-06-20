@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('video', help='Path to video to crop')
 parser.add_argument('-t', '--trim', help='Trim video from arg1 for arg2 duration. Defaults to end if arg2 not provided')
 end = parser.add_mutually_exclusive_group()
-end.add_argument('-e', '--end', help='Trim video to specific time. This is slower than using -d. Mutex with -d')
+end.add_argument('-e', '--end', '--to', help='Trim video to specific time. This is slower than using -d. Mutex with -d')
 end.add_argument('-d', '--duration', help='Trim video for this amount from start time. Mutex with -e')
 parser.add_argument('-n', '--name', help='Name out cropped video file. Defaults to {filename}_cropped.{suffix}')
 parser.add_argument('-l', '--local', help='Flag for whether to output file in current directory', action='store_true')
@@ -64,9 +64,9 @@ if trim := d.get('trim'):
         finish_msg += f' for {format_time(duration)}'
         ffmpeg_args += ['-ss', trim, '-i', d['video'], '-t', duration]
 
-    elif to := d.get('to'):
-        finish_msg += f' to {format_time(to)}'
-        ffmpeg_args += ['-i', d['video'], '-ss', trim, '-to', to]
+    elif end_time := d.get('end'):
+        finish_msg += f' to {format_time(end_time)}'
+        ffmpeg_args += ['-i', d['video'], '-ss', trim, '-to', end_time]
         # http://trac.ffmpeg.org/wiki/Seeking
         # need to put '-ss' after '-i' or '-to' does not work as intended
     else:
