@@ -11,7 +11,7 @@ parser.add_argument('-t', '--trim', help='Trim video from arg1 for arg2 duration
 end = parser.add_mutually_exclusive_group()
 end.add_argument('-e', '--end', help='Trim video to specific time. This is slower than using -d. Mutex with -d')
 end.add_argument('-d', '--duration', help='Trim video for this amount from start time. Mutex with -e')
-parser.add_argument('-n', '--name', help='Name out cropped video file. Defaults to {filename}_cropped.mp4')
+parser.add_argument('-n', '--name', help='Name out cropped video file. Defaults to {filename}_cropped.{suffix}')
 parser.add_argument('-l', '--local', help='Flag for whether to output file in current directory', action='store_true')
 args = parser.parse_args()
 d = vars(args)
@@ -50,7 +50,8 @@ if name := d.get('name'):
         name += '.mp4'
     output_filename = name
 else:
-    output_filename = original_filename[:-4] + '_cropped.mp4'
+    suffix = path.suffix
+    output_filename = original_filename[:-len(suffix)] + f'_cropped{suffix}'
 
 # https://video.stackexchange.com/questions/4563/how-can-i-crop-a-video-with-ffmpeg
 # https://superuser.com/questions/138331/using-ffmpeg-to-cut-up-video
