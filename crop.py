@@ -90,7 +90,7 @@ if d.get('mute'):
 else:
     ffmpeg_args += [get_output_location(output_filename)]
 
-print(' '.join([a if ' ' not in a else repr(a) for a in ffmpeg_args ]))
+print(' '.join([a if ' ' not in a else repr(a) for a in ffmpeg_args]))
 start = perf_counter()
 subprocess.run(ffmpeg_args)
 finish = perf_counter()
