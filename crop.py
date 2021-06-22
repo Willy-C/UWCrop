@@ -21,9 +21,6 @@ path = pathlib.Path(d['video'])
 if not path.is_file():
     raise ValueError('Unable to find that video')
 
-if (d.get('duration') is not None or d.get('end') is not None) and d.get('trim') is None:
-    d['trim'] = '0'
-
 
 @cache
 def get_output_location(filename):
@@ -58,36 +55,36 @@ else:
 # https://superuser.com/questions/138331/using-ffmpeg-to-cut-up-video
 ffmpeg_args = ['ffmpeg']
 finish_msg = f'Cropped {original_filename!r} to {get_output_location(output_filename)!r}'
+is_seeking = False
 
-if (trim := d.get('trim')) is not None:
+if (trim := d.get('trim')) is not None and trim != '0':
     ffmpeg_args += ['-ss', trim, '-i', d['video']]
     finish_msg += f' from {format_time(trim)}'
+    is_seeking = True
+else:
+    ffmpeg_args += ['-i', d['video']]
 
-    if duration := d.get('duration'):
-        finish_msg += f' for {format_time(duration)}'
-        ffmpeg_args += ['-t', duration]
 
-    elif end_time := d.get('end'):
-        finish_msg += f' to {format_time(end_time)}'
+if duration := d.get('duration'):
+    finish_msg += f' for {format_time(duration)}'
+    ffmpeg_args += ['-t', duration]
+
+elif end_time := d.get('end'):
+    finish_msg += f' to {format_time(end_time)}'
+    if is_seeking:
         ffmpeg_args[1:] = ffmpeg_args[3:] + ffmpeg_args[1:3]  # [1, 2, 3, 4, 5] -> [1, 4, 5, 2, 3]
         # http://trac.ffmpeg.org/wiki/Seeking
         # need to put '-ss' after '-i' or '-to' does not work as intended
         # so we will just swap elements
-        ffmpeg_args += ['-to', end_time]
+    ffmpeg_args += ['-to', end_time]
 
-    if trim == '0':
-        ffmpeg_args += ['-filter:v', 'crop=in_w-640:in_h', '-c:a', 'copy']
-    else:
-        ffmpeg_args += ['-filter:v', 'crop=in_w-640:in_h']
-        # using '-c:a copy' with '-ss' will cause issues such as audio de-sync
-        # but '-ss 0' (seek to 0) does not do anything and is unaffected
-
-else:
-    ffmpeg_args += ['-i', d['video'], '-filter:v', 'crop=in_w-640:in_h', '-c:a', 'copy']
+ffmpeg_args += ['-filter:v', 'crop=in_w-640:in_h']
 
 if d.get('mute'):
     ffmpeg_args += ['-an', get_output_location(output_filename)]
 else:
+    if not is_seeking:
+        ffmpeg_args += ['-c:a', 'copy']
     ffmpeg_args += [get_output_location(output_filename)]
 
 print(' '.join([a if ' ' not in a else repr(a) for a in ffmpeg_args]))
