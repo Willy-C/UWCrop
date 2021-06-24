@@ -14,4 +14,12 @@ Optional command-line args:
 - `-d --duration` to specify the total duration of the clip to trim. (`--end` and `--duration` are mutually exclusive)
 - `-n --name` to specify the output filename. Defaults to {filename}_cropped.mp4
 - `-l --local` to specify whether the output should be in the current directory
+
+Audio Options:
+
+These options are all mutually exclusive and optional. Omit all of them to combine both audio tracks. 
+Some options are not available if the input file only has 1 audio track.
 - `-m --mute` to specify whether the output should be muted
+- `-nm --nomic` to specify whether to exclude the mic input audio track
+- `-pt --preservetrack -2t --2track` to preserve the 2 separate audio tracks
+
