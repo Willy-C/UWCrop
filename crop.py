@@ -35,7 +35,7 @@ def get_output_location(filename):
         subdir = path.with_name(sd)
         if subdir.is_dir():
             return fr'{subdir}\{filename}'
-    return filename
+    return str(path.with_name(filename))
 
 
 def format_time(time):
